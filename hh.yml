@@ -1,0 +1,28 @@
+---
+- name: Send POST request using Ansible URI module
+  hosts: localhost  # You can specify your target host(s) here
+  gather_facts: no
+  tasks:
+    - name: Send POST request
+      uri:
+        url: http://ntfy.botweb.online/test
+        method: POST
+        body: "Oh my ..."
+        headers:
+          Content-Type: "application/x-www-form-urlencoded"
+          Title: "Dogs are better than cats"
+        status_code: 200  # You can adjust the expected status code as needed
+      register: response
+
+    - name: Debug response
+      debug:
+        var: response
+
+    - name: Post to https://ntfy.sh/controversial
+      uri:
+        url: http://ntfy.botweb.online/test
+        method: POST
+        body: "Oh my ... hello"
+        headers:
+          Title: "Dogs are better than cats"
+

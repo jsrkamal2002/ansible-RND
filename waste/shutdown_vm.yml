@@ -1,0 +1,16 @@
+---
+- name: Stoping the VM in the proxmox
+  hosts: prox
+  remote_user: rajkamal
+  gather_facts: false
+  tasks:
+    - name: Shutdown VM
+      community.general.proxmox_kvm:
+        api_user: root@pam
+        api_password: Kamal2002*
+        api_host: proxmox
+        vmid: "{{ item }}"
+        state: stopped
+      loop:
+        - 100
+        - 200

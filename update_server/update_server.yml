@@ -1,0 +1,81 @@
+---
+- name: update the servers
+  hosts: update
+  ignore_errors: yes
+  vars_files:
+    - sudo_pass.yml
+  tasks:
+    - name: update apt repo and cache on Debian os
+      ansible.builtin.apt:
+        name: "*"
+        state: latest
+        update_cache: yes
+        force_apt_get: yes
+        cache_valid_time: 3600
+      when: ansible_facts['os_family'] == "Debian"
+    - name: upgrade all packages on the Debian os
+      ansible.builtin.apt:
+        upgrade: dist
+        force_apt_get: yes
+        update_cache: yes
+        cache_valid_time: 3600
+      when: ansible_facts['os_family'] == "Debian"
+    - name: remove all the packages not needed anymore
+      ansible.builtin.apt:
+        autoremove: yes
+      when: ansible_facts['os_family'] == "Debian"
+    - name: check if a reboot is needed or not
+      register: reboot_required_files
+      stat:
+        path: /var/run/reboot-required
+        get_md5: no
+      when: ansible_facts['os_family'] == "Debian"
+    - name: reboot the Debian os
+      ansible.builtin.reboot:
+        msg: "Reboot initiated by Ansible for kernel updates"
+        connect_timeout: 5
+        reboot_timeout: 300
+        pre_reboot_delay: 0
+        post_reboot_delay: 30
+        test_command: uptime
+      when: (reboot_required_files.stat.exists) and (ansible_facts['os_family'] == "Debian")
+    - name: Ntfy notification
+      uri:
+        url: https://ntfy.botweb.online/ansible
+        method: POST
+        body: "Debian Updates Finished  🧑🏾‍🔧 "
+        body_format: raw
+        headers:
+          Content-Type: "text/plain"
+          Title: "Ansible Notification"
+        status_code: 200
+      when: ansible_facts['os_family'] == "Debian"
+
+    #   Redhat
+
+    - name: update yum repo and cache on redhat
+      ansible.builtin.yum:
+        name: "*"
+        state: latest
+        update_cache: yes
+        update_only: yes
+      when: ansible_facts['os_family'] == "RedHat"
+      register: yum_update_status
+    - name: remove all the packages not needed anymore
+      ansible.builtin.yum:
+        autoremove: yes
+      when: ansible_facts['os_family'] == "RedHat"
+    - name: reboot when packages were updated
+      reboot:
+      when: (ansible_facts['os_family'] == "RedHat") and (yum_update_status.changed)
+    - name: Ntfy notification
+      uri:
+        url: https://ntfy.botweb.online/ansible
+        method: POST
+        body: "RHEL Updates Finished  🧑🏾‍🔧 "
+        body_format: raw
+        headers:
+          Content-Type: "text/plain"
+          Title: "Ansible Notification"
+        status_code: 200
+      when: ansible_facts['os_family'] == "RedHat"

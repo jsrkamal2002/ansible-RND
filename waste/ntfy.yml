@@ -1,0 +1,18 @@
+---
+- name: Send HTTP POST request with custom headers
+  hosts: localhost  # or specify the target host where you want to run this task
+  tasks:
+    - name: Send HTTP POST request
+      uri:
+        url: https://ntfy.botweb.online/ansible
+        method: POST
+        body: "Finished 😍 "
+        body_format: raw
+        headers:
+          Content-Type: "text/plain"
+          Title: "Ansible status !!"
+        status_code: 200  # Replace with the expected status code
+      register: response
+
+    - debug:
+        var: response

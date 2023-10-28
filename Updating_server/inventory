@@ -1,0 +1,12 @@
+[redhat]
+192.168.1.121
+
+[redhat:vars]
+ansible_become_pass='{{redhat_sudo_pass}}'
+
+[homenas]
+192.168.1.123
+
+[homenas:vars]
+ansible_become_pass='{{homenas_sudo_pass}}'
+

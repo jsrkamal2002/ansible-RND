@@ -1,0 +1,19 @@
+---
+- name: check
+  hosts: test
+  remote_user: rajkamal
+  tasks:
+    - name: debug
+      debug:
+        var: ansible_facts
+    - name: send msg to ansible
+      uri:
+        url: https://ntfy.botweb.online/ansible
+        method: POST
+        body: "Ansible finished"
+        body_format: raw
+        status_code: 200
+      register: response
+    - name: debug
+      debug:
+        var: response

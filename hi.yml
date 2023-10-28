@@ -1,0 +1,13 @@
+---
+- name: playbook for ntfy notification
+  hosts: localhost
+  tasks:
+    - name: Push the notifiction to ntfy
+      uri:
+        url: "http://ntfy.botweb.online/test"
+        method: POST
+        body_format: form-urlencoded
+        body:
+          data: "Hello from ansible"
+        headers:
+          Title: "Test from ansible"

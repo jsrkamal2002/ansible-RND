@@ -1,0 +1,23 @@
+---
+- name: check the rc when command
+  hosts: localhost
+  gather_facts: no
+  vars:
+    noti: "{{ result.content | length > 0 }}"
+  tasks:
+    - name: curl command
+      uri:
+        url: 'https://github.com/jsrkamal2002.keys'
+        method: GET
+        body_format: json
+        return_content: true
+      register: result
+
+    - debug:
+        var: result.content
+      when: noti
+    - name: copy the key to txt file
+      copy:
+        content: "{{ result.content }}"
+        dest: "./key.txt"
+      when: noti
