@@ -39,8 +39,14 @@
 - name: Add the ansible user to sudoers
   hosts: server
   tasks:
+    - name: Backup of sudoers file
+      ansible.builtin.copy:
+        src: /etc/sudoers
+        dest: /etc/sudoers.bck
+        remote_src: true
+        mode: '0440'
     - name: Sudoers file modify
       ansible.builtin.lineinfile:
         dest: /etc/sudoers
-        line: "ansible ALL=(ALL) NOPASSWD:ALL"
-        validate: "visudo -cf %s"
+        line: 'ansible ALL=(ALL) NOPASSWD:ALL'
+        validate: 'visudo -cf %s'
