@@ -1,0 +1,46 @@
+---
+- name: Creating Ansible user for further movement in ansible
+  hosts: server
+  vars:
+    user_pass: <your_password>
+  tasks:
+    - name: Create the user ansible
+      ansible.builtin.user:
+        name: ansible
+        shell: /bin/bash
+        password: "{{ user_pass | password_hash('sha512') }}"
+      become: true
+- name: Creating the .ssh directory
+  hosts: server
+  vars:
+    pub_url: <url>
+  tasks:
+    - name: Create .ssh directory
+      ansible.builtin.file:
+        path: /home/ansible/.ssh
+        state: directory
+        mode: "0700"
+        owner: ansible
+        group: ansible
+    - name: Pasting the pub keys
+      ansible.builtin.get_url:
+        url: "{{ pub_url }}"
+        dest: /home/ansible/.ssh/authorized_keys
+        mode: "0644"
+        owner: ansible
+        group: ansible
+      check_mode: true
+      register: result
+      notify: Ensure authorized_keys is updated
+  handlers:
+    - name: Ensure authorized_keys is updated
+      ansible.builtin.debug:
+        msg: "File updated: {{ result.changed }}"
+- name: Add the ansible user to sudoers
+  hosts: server
+  tasks:
+    - name: Sudoers file modify
+      ansible.builtin.lineinfile:
+        dest: /etc/sudoers
+        line: "ansible ALL=(ALL) NOPASSWD:ALL"
+        validate: "visudo -cf %s"
