@@ -1,0 +1,33 @@
+---
+- name: Update of ubuntu servers
+  hosts: server
+  ignore_errors: true
+  tasks:
+    - name: Update the server
+      ansible.builtin.apt:
+        update_cache: true
+        force_apt_get: true
+        cache_valid_time: 3600
+    - name: Upgrade the server
+      ansible.builtin.apt:
+        upgrade: dist
+        force_apt_get: true
+    - name: Remove the unwanted from the server
+      ansible.builtin.apt:
+        autoremove: true
+    - name: Check if a reboot is needed
+      ansible.builtin.stat:
+        path: /var/run/reboot-required
+      register: reboot_required_result
+    - name: Reboot the server
+      ansible.builtin.reboot:
+      when: reboot_required_result.stat.exists
+    - name: Reboot the server
+      ansible.builtin.reboot:
+        msg: "Reboot initiated by Ansible due to kernel updates"
+        connect_timeout: 5
+        reboot_timeout: 300
+        pre_reboot_delay: 0
+        post_reboot_delay: 30
+        test_command: uptime
+      when: reboot_required_file.stat.exists
