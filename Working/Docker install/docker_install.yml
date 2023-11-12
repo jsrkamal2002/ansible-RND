@@ -1,0 +1,23 @@
+---
+- name: Install docker in the server
+  hosts: server
+  become: true
+  vars:
+    docker_user: <user>
+  tasks:
+    - name: Download Docker installation script
+      ansible.builtin.get_url:
+        url: https://get.docker.com
+        dest: /tmp/get-docker.sh
+        mode: "0755"
+
+    - name: Execute Docker installation script
+      ansible.builtin.command:
+        cmd: sudo sh /tmp/get-docker.sh
+      args:
+        creates: /usr/bin/docker
+    - name: Adding the User to the docker group
+      ansible.builtin.user:
+        name: "{{ docker_user }}"
+        groups: docker
+        append: true
