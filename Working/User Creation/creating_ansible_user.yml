@@ -29,7 +29,7 @@
         mode: "0644"
         owner: ansible
         group: ansible
-      check_mode: true
+      # check_mode: true
       register: result
       notify: Ensure authorized_keys is updated
   handlers:
